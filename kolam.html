@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="assets/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="assets/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/css/animate.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/DataTables/datatables.min.css">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>SportFinder</title>
+	<link type="text/css" href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link type="text/css" href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+	<link type="text/css" href="css/theme.css" rel="stylesheet">
+	<link type="text/css" href="images/icons/css/font-awesome.css" rel="stylesheet">
+	<link type="text/css" href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600' rel='stylesheet'>
+	
+	<script src="https://www.gstatic.com/firebasejs/4.8.1/firebase.js"></script>
+
+	<script>
+	  // Initialize Firebase
+	  var config = {
+	    apiKey: "AIzaSyDv_PTKoqKqwCRlBUnDILhDhX49yvU2Zqc",
+	    authDomain: "sportfinderm.firebaseapp.com",
+	    databaseURL: "https://sportfinderm.firebaseio.com",
+	    projectId: "sportfinderm",
+	    storageBucket: "sportfinderm.appspot.com",
+	    messagingSenderId: "1019651276793"
+	  };
+	  firebase.initializeApp(config);
+	</script>
+</head>
+<body>
+
+	<div class="navbar navbar-fixed-top">
+		<div class="navbar-inner">
+			<div class="container">
+				<a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-inverse-collapse">
+					<i class="icon-reorder shaded"></i>
+				</a>
+
+			  	<a class="brand" href="index.html">
+			  		SportFinder
+			  	</a>
+
+				<div class="nav-collapse collapse navbar-inverse-collapse">
+
+				
+					<ul class="nav pull-right">
+						
+						
+						<li class="nav-user dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+								<img src="images/user.png" class="nav-avatar" />
+								<b class="caret"></b>
+							</a>
+							<ul class="dropdown-menu">
+								<li><a href="#">Your Profile</a></li>
+								<li><a href="#">Edit Profile</a></li>
+								<li><a href="#">Account Settings</a></li>
+								<li class="divider"></li>
+								<li><a href="#">Logout</a></li>
+							</ul>
+						</li>
+					</ul>
+				</div><!-- /.nav-collapse -->
+			</div>
+		</div><!-- /navbar-inner -->
+	</div><!-- /navbar -->
+
+
+
+	<div class="wrapper">
+		<div class="container">
+			<div class="row">
+				<div class="span3">
+					<div class="sidebar">
+
+						<ul class="widget widget-menu unstyled">
+                                <li><a class="collapsed" data-toggle="collapse" href="#togglePages"><i class="menu-icon icon-cog">
+                                </i><i class="icon-chevron-down pull-right"></i><i class="icon-chevron-up pull-right">
+                                </i>Tipe Lapangan</a>
+                                    <ul id="togglePages" class="collapse unstyled">
+                                        <li><a href="activity.html"><i class="icon-inbox"></i>Lapangan Indoor </a></li>
+                                        <li><a href="outdoor.html"><i class="icon-inbox"></i>Lapangan Outdoor</a></li>
+                                        <li><a href="kolam.html"><i class="icon-inbox"></i>Kolam Renang</a></li>
+                                    </ul>
+                                </li>					
+					</div><!--/.sidebar-->
+				</div><!--/.span3-->
+
+
+				<div class="span9">
+					<div class="content">
+
+						<div class="module">
+							<div class="module-head">
+								<h3>Input Data Kolam Renang</h3>
+							</div>
+							<div class="module-body">
+								<div class="module-body">
+                                <div class="stream-composer media">
+									<br>
+									<table class="table table-striped" id="example">
+										<tr>
+											<td>Nama</td>
+											<td><input type="text" name="nama" id="nama"></td>
+										</tr>
+										<tr>
+											<td>Alamat</td>
+											<td><textarea name="alamat" id="alamat"></textarea></td>
+										</tr>
+										<tr>
+											<td>Telp</td>
+											<td><input type="text" name="telp" id="telp"></td>
+										</tr>
+										<tr>
+											<td>Keterangan</td>
+											<td><textarea name="keterangan" id="keterangan"></textarea></td>
+										</tr>
+										<tr>
+											<td> Foto </td>
+											<td> <input type="file" id="inpBilde"> </td>
+										</tr>
+										<tr>
+											<td colspan="2"><input type="button" value="Save" id="btnSave" onclick="saveData();"></td>
+										</tr>
+									</table>
+								
+									<br/ >
+
+									<br/ >
+									<br/ >
+									<br/ >								
+									<div class="module-head">
+										<h3>Tables</h3>
+									</div>
+
+									<div class="module-body">
+										<table class="table" id="kolamRenang">
+										  	<thead>
+												<tr>
+													<th>Nama </th>
+											  		<th>Alamat</th>
+												  	<th>Telp</th>
+													<th>Keterangan</th>
+												    <!-- <th>Foto</th> -->
+												    <th>Aksi</th>
+												</tr>
+										    </thead>
+										</table>
+
+									<script>
+										var tabelkolamRenang = document.getElementById('kolamRenang');
+										let database = firebase.database();
+										let storage = firebase.storage();
+
+										let inpBilde = document.getElementById("inpBilde");
+										let bildeurler = database.ref("KolamRenang");
+
+										var databaseRef = firebase.database().ref('KolamRenang/');
+										rowIndex=1;
+										
+										
+										databaseRef.once('value', function(snapshot)
+										{
+											snapshot.forEach(function(childSnapshot)
+											{
+												var childKey = childSnapshot.key;
+												var childData = childSnapshot.val();
+
+												var row = tabelkolamRenang.insertRow(rowIndex);
+											
+
+												// var cellId = row.insertCell(0);
+												var cellNama = row.insertCell(0);
+												var cellAlamat = row.insertCell(1);
+												var cellTelp = row.insertCell(2);
+												var cellKeterangan = row.insertCell(3);
+												//var cellGambar = row.insertCell(4);
+												var btn1 = row.insertCell(4);
+											
+
+												// cellId.appendChild(document.createTextNode(childKey)); ID
+												cellNama.appendChild(document.createTextNode(childData.nama));//sesuai colom
+												cellAlamat.appendChild(document.createTextNode(childData.alamat));
+												cellTelp.appendChild(document.createTextNode(childData.telp));
+												cellKeterangan.appendChild(document.createTextNode(childData.keterangan));
+												// cellGambar.put(document.createTextNode(childData.imageURL));
+
+												
+											
+
+												var button = document.createElement("button");
+												var button1 = document.createElement("button");
+												var u = document.createTextNode("Update");
+												var d = document.createTextNode("Delete");
+												button.appendChild(u);
+												button1.appendChild(d);
+									    		// btn1.appendChild(button);
+
+									    		btn1.appendChild(button1).onclick = function(childKey)
+									    		 {
+									    		 	
+									    		 	var childKey = childSnapshot.key;
+									    		 	firebase.database().ref().child('/KolamRenang/' +childKey).remove();
+													alert('Success Delete !');
+													reload_page();
+
+									    		 }
+								    		
+												rowIndex = rowIndex + 1;
+											});
+											});
+
+										function saveData() 
+										{
+											var bilde = this.files[0];
+											var bildenvn = storage.ref("All_Image_Uploads/" + new Date);
+											bildenvn.put(bilde).then(lagreURL);
+										}
+
+										function lagreURL(snap) 
+										{
+											var url = snap.downloadURL;
+											var uid = firebase.database().ref().child('KolamRenang').push().key;
+											var nama = document.getElementById('nama').value;
+											var alamat = document.getElementById('alamat').value;
+											var telp = document.getElementById('telp').value;
+											var keterangan = document.getElementById('keterangan').value;
+											var data = 
+											{
+												id: uid,
+												nama: nama,
+												alamat: alamat,
+												telp: telp,
+												keterangan: keterangan,
+												imageURL: url
+											}
+
+											var updates = {};
+											updates['/KolamRenang/' +uid] = data;
+											firebase.database().ref().update(updates);
+											alert('Success Save !');
+											reload_kolam();
+										}
+
+										inpBilde.onchange = saveData;
+									
+									
+										function reload_kolam()
+								        {
+								            window.location='kolam.html'
+								            
+								        }
+								
+									</script>
+
+							</div>
+								
+							</div><!--/.module-body-->
+
+						</div><!--/.module-->
+						
+					</div><!--/.content-->
+				</div><!--/.span9-->
+
+			</div>
+
+		</div><!--/.container-->
+
+	</div><!--/.wrapper-->
+
+	<script src="scripts/jquery-1.9.1.min.js" type="text/javascript"></script>
+	<script src="scripts/jquery-ui-1.10.1.custom.min.js" type="text/javascript"></script>
+	<script src="bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+</body>
